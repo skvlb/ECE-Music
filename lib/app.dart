@@ -53,14 +53,29 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: MaterialApp.router(
-          debugShowCheckedModeBanner: false,
-          routerConfig: _router(repository),
-          theme: ThemeData(
-            fontFamily: 'SFPro',
-            useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-          ),
-        ),
+  debugShowCheckedModeBanner: false,
+  routerConfig: _router(repository),
+  theme: ThemeData(
+    fontFamily: 'SFPro',
+    useMaterial3: true,
+    colorScheme: ColorScheme.light(
+      primary: Colors.green,
+      secondary: Colors.green,
+      background: Colors.white,
+    ),
+    scaffoldBackgroundColor: Colors.white,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      elevation: 0,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: Colors.white,
+      selectedItemColor: Colors.green,
+      unselectedItemColor: Colors.grey,
+    ),
+  ),
+),
       ),
     );
   }

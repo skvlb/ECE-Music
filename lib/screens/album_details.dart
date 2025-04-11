@@ -11,6 +11,8 @@ import '../blocs/album/album_bloc.dart';
 import '../blocs/album/album_state.dart';
 import '../blocs/album/album_event.dart';
 
+import '../constants/app_icons.dart';
+
 class AlbumDetailsScreen extends StatelessWidget {
   final String albumId;
 
@@ -90,12 +92,10 @@ class AlbumDetailsScreen extends StatelessWidget {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                IconButton(
-                                  icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-                                  onPressed: () {
-                                    context.go('/');
-                                  },
-                                ),
+IconButton(
+  icon: AppIcons.flecheGauche(color: Colors.white),
+  onPressed: () => context.go('/'),
+),
                                 StatefulBuilder(
                                   builder: (context, setState) {
                                     bool isFavorited = favoritesBox.containsKey('album_${album.id}');
@@ -143,13 +143,13 @@ class AlbumDetailsScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Row(
-                              children: [
-                                const Icon(Icons.star, color: Colors.black54, size: 18),
-                                const SizedBox(width: 8),
-                                Text(
-                                  album.intScore ?? '4.0',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
+  children: [
+    AppIcons.etoile(color: Colors.amber),
+    const SizedBox(width: 8),
+    Text(
+      album.intScore ?? '4.0',
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    ),
                                 const SizedBox(width: 12),
                                 Text('${album.intScoreVotes ?? '323'} votes'),
                               ],

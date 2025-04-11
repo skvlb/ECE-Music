@@ -11,6 +11,8 @@ import '../blocs/artist/artist_bloc.dart';
 import '../blocs/artist/artist_state.dart';
 import '../blocs/artist/artist_event.dart';
 
+import '../constants/app_icons.dart';
+
 class ArtistDetailsScreen extends StatelessWidget {
   final String artistId;
 
@@ -55,36 +57,37 @@ class ArtistDetailsScreen extends StatelessWidget {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
-                              icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white, size: 20),
-                              onPressed: () => context.go('/'),
-                            ),
+  icon: AppIcons.flecheGauche(color: Colors.white),
+  onPressed: () => context.go('/'),
+),
                             StatefulBuilder(
                               builder: (context, setState) {
                                 bool isFavorited = favoritesBox.containsKey('artist_${artist.id}');
                                 return GestureDetector(
-                                  onTap: () {
-                                    if (isFavorited) {
-                                      favoritesBox.delete('artist_${artist.id}');
-                                    } else {
-                                      favoritesBox.put('artist_${artist.id}', artist.strArtist);
-                                    }
-                                    setState(() {
-                                      isFavorited = !isFavorited;
-                                    });
-                                  },
-                                  child: Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: const BoxDecoration(
-                                      color: Colors.white,
-                                      shape: BoxShape.circle,
-                                    ),
-                                    child: Icon(
-                                      isFavorited ? Icons.favorite : Icons.favorite_border,
-                                      color: isFavorited ? Colors.green : Colors.black,
-                                    ),
-                                  ),
-                                );
+  onTap: () {
+    if (isFavorited) {
+      favoritesBox.delete('artist_${artist.id}');
+    } else {
+      favoritesBox.put('artist_${artist.id}', '${artist.strArtist}|${artist.strArtistThumb ?? ""}');
+    }
+    setState(() {
+      isFavorited = !isFavorited;
+    });
+  },
+  child: Container(
+    width: 40,
+    height: 40,
+    decoration: const BoxDecoration(
+      color: Colors.white,
+      shape: BoxShape.circle,
+    ),
+    child: Center(
+      child: isFavorited 
+          ? AppIcons.likeOn(color: Colors.red) 
+          : AppIcons.likeOff(),
+    ),
+  ),
+);
                               },
                             ),
                           ],

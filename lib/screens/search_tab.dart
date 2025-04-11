@@ -7,6 +7,8 @@ import '../blocs/search/search_bloc.dart';
 import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
 
+import '../constants/app_icons.dart';
+
 class SearchTab extends StatefulWidget {
   const SearchTab({super.key});
 
@@ -40,31 +42,33 @@ class _SearchTabState extends State<SearchTab> {
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: TextField(
-                controller: _controller,
-                onSubmitted: _onSearch,
-                decoration: InputDecoration(
-                  hintText: '  Céline Dion',
-                  filled: true,
-                  fillColor: const Color(0xFFF1F1F1),
-                  prefixIcon: const Icon(Icons.search),
-                  suffixIcon: IconButton(
-                    icon: const Icon(Icons.clear),
-                    onPressed: () {
-                      _controller.clear();
-                      context.read<SearchBloc>().add(SearchArtistsAndAlbums(''));
-                    },
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
+Padding(
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  child: TextField(
+    controller: _controller,
+    onSubmitted: _onSearch,
+    decoration: InputDecoration(
+      hintText: 'Céline Dion',
+      filled: true,
+      fillColor: const Color(0xFFF1F1F1),
+      prefixIcon: const Icon(Icons.search, color: Colors.grey),
+      suffixIcon: _controller.text.isNotEmpty
+          ? IconButton(
+              icon: const Icon(Icons.clear, color: Colors.grey),
+              onPressed: () {
+                _controller.clear();
+                context.read<SearchBloc>().add(SearchArtistsAndAlbums(''));
+              },
+            )
+          : null,
+      contentPadding: const EdgeInsets.symmetric(vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide.none,
+      ),
+    ),
+  ),
+),
             const SizedBox(height: 16),
             Expanded(
               child: BlocBuilder<SearchBloc, SearchState>(

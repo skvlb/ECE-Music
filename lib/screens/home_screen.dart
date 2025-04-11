@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import '../constants/app_icons.dart';
 
 import 'charts_tab.dart';
 import 'search_tab.dart';
@@ -28,31 +29,37 @@ class _HomeScreenState extends State<HomeScreen> {
           FavoritesTab(),
         ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.green,
-        unselectedItemColor: Colors.black54,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.bar_chart_rounded),
-            label: 'Classements',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search_rounded),
-            label: 'Recherche',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.library_music_rounded),
-            label: 'Favoris',
-          ),
-        ],
-      ),
+bottomNavigationBar: BottomNavigationBar(
+  backgroundColor: Colors.white,
+  currentIndex: _selectedIndex,
+  selectedItemColor: Colors.green,
+  unselectedItemColor: Colors.grey,
+  onTap: (index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  },
+  items: [
+    BottomNavigationBarItem(
+      icon: _selectedIndex == 0 
+          ? AppIcons.classements(color: Colors.green)
+          : AppIcons.classements(color: Colors.grey),
+      label: 'Classements',
+    ),
+    BottomNavigationBarItem(
+      icon: _selectedIndex == 1 
+          ? AppIcons.recherche(color: Colors.green) 
+          : AppIcons.recherche(color: Colors.grey),
+      label: 'Recherche',
+    ),
+    BottomNavigationBarItem(
+      icon: _selectedIndex == 2 
+          ? AppIcons.favoris(color: Colors.green) 
+          : AppIcons.favoris(color: Colors.grey),
+      label: 'Favoris',
+    ),
+  ],
+),
     );
   }
 }
