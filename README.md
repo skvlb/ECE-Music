@@ -1,16 +1,47 @@
-# ece_music
+# 🎵 Application Musicale Flutter – Projet ECE 2025
 
-A new Flutter project.
+Une application mobile Flutter inspirée d’Apple Music permettant de rechercher, consulter et ajouter en favoris des artistes ou albums via l’API [TheAudioDB](https://www.theaudiodb.com/).
 
-## Getting Started
+---
 
-This project is a starting point for a Flutter application.
+## ✨ Fonctionnalités
 
-A few resources to get you started if this is your first Flutter project:
+- 🔍 Recherche d’artistes et d’albums
+- 📈 Page “Classements” (Top Titres / Albums)
+- 📄 Fiches détaillées artistes & albums
+- ❤️ Système de favoris local (via Hive)
+- 🧭 Navigation fluide via GoRouter
+- 💚 Design iOS-like (police SFPro, composants doux)
+- 🔄 Loader automatique sur chaque appel API
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📦 Stack technique
+
+| Technologie     | Usage |
+|----------------|-------|
+| **Flutter**     | Framework principal |
+| **Flutter Bloc** | Gestion d’état |
+| **GoRouter**    | Navigation dynamique |
+| **Hive**        | Stockage local des favoris |
+| **Dio**         | Requêtes HTTP |
+| **CachedNetworkImage** | Chargement d'images optimisé |
+| **TheAudioDB**  | API musicale en ligne |
+
+---
+
+## 🚀 Lancer le projet (Windows)
+
+### 🔧 Prérequis
+
+- Flutter SDK (3.x recommandé)
+- VS Code / Android Studio
+- Téléphone Android avec le mode développeur activé
+- Ouvrir en web avec : start chrome --disable-web-security --user-data-dir="C:/chrome_dev" et copier le localhost dans cette fenêtre
+
+### ▶️ Étapes
+
+```bash
+flutter pub get
+flutter devices
+flutter run
