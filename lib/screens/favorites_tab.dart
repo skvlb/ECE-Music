@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+
 import '../blocs/favorites/favorites_bloc.dart';
 import '../blocs/favorites/favorites_event.dart';
 import '../blocs/favorites/favorites_state.dart';
-import '../widgets/loading_indicator.dart';
-import '../widgets/error_view.dart';
-import '../models/favorites.dart';
 
 class FavoritesTab extends StatelessWidget {
   const FavoritesTab({super.key});
@@ -14,96 +13,182 @@ class FavoritesTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Favoris',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-        ),
-      ),
+      backgroundColor: Colors.white,
       body: BlocBuilder<FavoritesBloc, FavoritesState>(
         builder: (context, state) {
-          if (state.status == FavoritesStatus.initial || state.status == FavoritesStatus.loading) {
-            return const LoadingIndicator();
-          } else if (state.status == FavoritesStatus.failure) {
-            return ErrorView(
-              message: state.errorMessage ?? 'Une erreur est survenue',
-              onRetry: () {
-                context.read<FavoritesBloc>().add(LoadFavorites());
-              },
-            );
-          }
-          
-          if (state.favorites.isEmpty) {
-            return const Center(
-              child: Text(
-                'Aucun artiste favori',
-                style: TextStyle(fontSize: 16),
+          final box = Hive.box<String>('favorites');
+
+          final artistFavorites = box.keys
+              .where((key) => key.startsWith('artist_'))
+              .map((key) => box.get(key))
+              .whereType<String>()
+              .toList();
+
+          final albumFavorites = box.keys
+              .where((key) => key.startsWith('album_'))
+              .map((key) => box.get(key))
+              .whereType<String>()
+              .toList();
+
+          Widget buildAvatar(String? url, IconData fallbackIcon) {
+            return url != null && url.isNotEmpty
+                ? ClipRRect(
+              borderRadius: BorderRadius.circular(25),
+              child: CachedNetworkImage(
+                imageUrl: url,
+                width: 48,
+                height: 48,
+                fit: BoxFit.cover,
+                errorWidget: (_, __, ___) =>
+                    Icon(fallbackIcon, size: 28),
               ),
+            )
+                : CircleAvatar(
+              backgroundColor: Colors.white,
+              radius: 24,
+              child: Icon(fallbackIcon),
             );
           }
-          
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+
+          return ListView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             children: [
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Artistes',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                  ),
+              const SizedBox(height: 12),
+              const Text(
+                'Favoris',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'SFPro',
                 ),
               ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: state.favorites.length,
-                  itemBuilder: (context, index) {
-                    final favorite = state.favorites[index];
-                    return _FavoriteArtistTile(
-                      favorite: favorite,
-                      onTap: () {
-                        context.push('/artist/${favorite.id}');
-                      },
-                    );
-                  },
+              const SizedBox(height: 4),
+              const Text(
+                'Mes artistes & albums',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontFamily: 'SFPro',
+                  fontSize: 14,
                 ),
+              ),
+              const SizedBox(height: 24),
+
+              /// ARTISTES
+              const Text(
+                'Artistes',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'SFPro',
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (artistFavorites.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text('Aucun artiste en favori pour le moment.'),
+                ),
+              ...artistFavorites.map(
+                    (data) {
+                  final parts = data.split('|');
+                  final name = parts[0];
+                  final imageUrl = parts.length > 1 ? parts[1] : null;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      leading: buildAvatar(imageUrl, Icons.person),
+                      title: Text(
+                        name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'SFPro',
+                        ),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        // TODO: Naviguer vers ArtistDetailsScreen
+                      },
+                    ),
+                  );
+                },
+              ),
+
+              const SizedBox(height: 24),
+
+              /// ALBUMS
+              const Text(
+                'Albums',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'SFPro',
+                  fontSize: 20,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (albumFavorites.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: Text('Aucun album en favori pour le moment.'),
+                ),
+              ...albumFavorites.map(
+                    (data) {
+                  final parts = data.split('|');
+                  final name = parts[0];
+                  final imageUrl = parts.length > 1 ? parts[1] : null;
+
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListTile(
+                      leading: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: imageUrl != null && imageUrl.isNotEmpty
+                            ? CachedNetworkImage(
+                          imageUrl: imageUrl,
+                          width: 48,
+                          height: 48,
+                          fit: BoxFit.cover,
+                          errorWidget: (_, __, ___) =>
+                          const Icon(Icons.album),
+                        )
+                            : Container(
+                          width: 48,
+                          height: 48,
+                          color: Colors.white,
+                          child: const Icon(Icons.album),
+                        ),
+                      ),
+                      title: Text(
+                        name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'SFPro',
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Artiste inconnu',
+                        style: TextStyle(fontSize: 12, color: Colors.grey),
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () {
+                        // TODO: Naviguer vers AlbumDetailsScreen
+                      },
+                    ),
+                  );
+                },
               ),
             ],
           );
         },
       ),
-    );
-  }
-}
-
-class _FavoriteArtistTile extends StatelessWidget {
-  final FavoriteArtist favorite;
-  final VoidCallback onTap;
-  
-  const _FavoriteArtistTile({
-    required this.favorite,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ListTile(
-      leading: favorite.thumbUrl != null
-          ? CircleAvatar(
-              backgroundImage: NetworkImage(favorite.thumbUrl!),
-              radius: 25,
-            )
-          : const CircleAvatar(
-              child: Icon(Icons.person),
-              radius: 25,
-            ),
-      title: Text(favorite.name),
-      subtitle: favorite.genre != null
-          ? Text(favorite.genre!)
-          : null,
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
     );
   }
 }

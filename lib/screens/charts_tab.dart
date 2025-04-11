@@ -4,95 +4,159 @@ import 'package:go_router/go_router.dart';
 import '../blocs/charts/charts_bloc.dart';
 import '../blocs/charts/charts_event.dart';
 import '../blocs/charts/charts_state.dart';
-import '../widgets/album_tile.dart';
-import '../widgets/track_tile.dart';
-import '../widgets/error_view.dart';
-import '../widgets/loading_indicator.dart';
+import '../models/album.dart';
+import '../models/track.dart';
 
-class ChartsTab extends StatelessWidget {
+class ChartsTab extends StatefulWidget {
   const ChartsTab({super.key});
 
   @override
+  State<ChartsTab> createState() => _ChartsTabState();
+}
+
+class _ChartsTabState extends State<ChartsTab> {
+  bool showTracks = true;
+
+  @override
+  void initState() {
+    super.initState();
+    final bloc = context.read<ChartsBloc>();
+    bloc.add(LoadTopAlbums());
+    bloc.add(LoadTopTracks());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              title: const Text(
-                'Classements',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+    return BlocBuilder<ChartsBloc, ChartsState>(
+      builder: (context, state) {
+        if (state.status == ChartsStatus.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final albums = state.topAlbums.take(8).toList();
+        final tracks = state.topTracks.take(8).toList();
+
+        return SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                child: Text(
+                  'Classements',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    fontFamily: 'SFPro',
+                  ),
+                ),
               ),
-              floating: true,
-              pinned: true,
-              bottom: TabBar(
-                tabs: const [
-                  Tab(text: 'Titres'),
-                  Tab(text: 'Albums'),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => showTracks = true),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Titres',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'SFPro',
+                              fontSize: 16,
+                              color: showTracks ? Colors.black : Colors.black45,
+                            ),
+                          ),
+                          if (showTracks)
+                            Container(
+                              height: 2,
+                              margin: const EdgeInsets.only(top: 4),
+                              color: Colors.green,
+                            )
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => showTracks = false),
+                      child: Column(
+                        children: [
+                          Text(
+                            'Albums',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'SFPro',
+                              fontSize: 16,
+                              color: showTracks ? Colors.black45 : Colors.black,
+                            ),
+                          ),
+                          if (!showTracks)
+                            Container(
+                              height: 2,
+                              margin: const EdgeInsets.only(top: 4),
+                              color: Colors.green,
+                            )
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
-                indicatorColor: Colors.green,
               ),
-            ),
-          ];
-        },
-        body: BlocBuilder<ChartsBloc, ChartsState>(
-          builder: (context, state) {
-            if (state.status == ChartsStatus.initial || state.status == ChartsStatus.loading) {
-              return const LoadingIndicator();
-            } else if (state.status == ChartsStatus.failure) {
-              return ErrorView(
-                message: state.errorMessage ?? 'Une erreur est survenue',
-                onRetry: () {
-                  context.read<ChartsBloc>().add(RefreshCharts());
-                },
-              );
-            }
-            
-            return TabBarView(
-              children: [
-                // Singles Tab
-                RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<ChartsBloc>().add(RefreshCharts());
-                  },
-                  child: ListView.builder(
-                    itemCount: state.singles.length,
-                    itemBuilder: (context, index) {
-                      final track = state.singles[index];
-                      return TrackTile(
-                        track: track,
-                        rank: index + 1,
+              const SizedBox(height: 12),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: showTracks ? tracks.length : albums.length,
+                  itemBuilder: (context, index) {
+                    if (showTracks) {
+                      final track = tracks[index];
+                      return ListTile(
+                        leading: track.thumbUrl != null
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(4),
+                          child: Image.network(
+                            track.thumbUrl!,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                            : Text('${index + 1}'),
+                        title: Text(
+                          track.title,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(track.artistName ?? ''),
                         onTap: () {
-                          context.push('/artist/${track.artistId}');
+                          context.go('/artist/${track.artistId}');
                         },
                       );
-                    },
-                  ),
-                ),
-                // Albums Tab
-                RefreshIndicator(
-                  onRefresh: () async {
-                    context.read<ChartsBloc>().add(RefreshCharts());
-                  },
-                  child: ListView.builder(
-                    itemCount: state.albums.length,
-                    itemBuilder: (context, index) {
-                      final album = state.albums[index];
-                      return AlbumTile(
-                        album: album,
+                    } else {
+                      final album = albums[index];
+                      return ListTile(
+                        leading: Image.network(
+                          album.strAlbumThumb ?? '',
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                        ),
+                        title: Text(
+                          album.strAlbum,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        subtitle: Text(album.strArtist),
                         onTap: () {
-                          context.push('/album/${album.id}');
+                          context.go('/album/${album.id}');
                         },
                       );
-                    },
-                  ),
+                    }
+                  },
                 ),
-              ],
-            );
-          },
-        ),
-      ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

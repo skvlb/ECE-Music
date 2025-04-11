@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:go_router/go_router.dart';
+
 import '../blocs/search/search_bloc.dart';
 import '../blocs/search/search_event.dart';
 import '../blocs/search/search_state.dart';
-import '../widgets/artist_tile.dart';
-import '../widgets/album_tile.dart';
-import '../widgets/loading_indicator.dart';
-import '../widgets/error_view.dart';
 
 class SearchTab extends StatefulWidget {
   const SearchTab({super.key});
@@ -17,153 +15,171 @@ class SearchTab extends StatefulWidget {
 }
 
 class _SearchTabState extends State<SearchTab> {
-  final TextEditingController _searchController = TextEditingController();
-  
-  @override
-  void initState() {
-    super.initState();
-    _searchController.addListener(_onSearchChanged);
-  }
-  
-  @override
-  void dispose() {
-    _searchController.removeListener(_onSearchChanged);
-    _searchController.dispose();
-    super.dispose();
-  }
-  
-  void _onSearchChanged() {
-    final query = _searchController.text;
-    if (query.isNotEmpty) {
-      context.read<SearchBloc>().add(SearchArtistsAndAlbums(query));
-    } else {
-      context.read<SearchBloc>().add(ClearSearch());
-    }
+  final TextEditingController _controller = TextEditingController();
+
+  void _onSearch(String query) {
+    context.read<SearchBloc>().add(SearchArtistsAndAlbums(query));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Rechercher',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
-        ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Artiste, album...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          context.read<SearchBloc>().add(ClearSearch());
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: Colors.grey.shade800,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+              child: Text(
+                'Rechercher',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'SFPro',
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: BlocBuilder<SearchBloc, SearchState>(
-              builder: (context, state) {
-                if (state.status == SearchStatus.initial) {
-                  return const Center(
-                    child: Text('Recherchez un artiste ou un album'),
-                  );
-                } else if (state.status == SearchStatus.loading) {
-                  return const LoadingIndicator();
-                } else if (state.status == SearchStatus.failure) {
-                  return ErrorView(
-                    message: state.errorMessage ?? 'Une erreur est survenue',
-                    onRetry: () {
-                      context.read<SearchBloc>().add(SearchArtistsAndAlbums(state.query));
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: _controller,
+                onSubmitted: _onSearch,
+                decoration: InputDecoration(
+                  hintText: '  Céline Dion',
+                  filled: true,
+                  fillColor: const Color(0xFFF1F1F1),
+                  prefixIcon: const Icon(Icons.search),
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.clear),
+                    onPressed: () {
+                      _controller.clear();
+                      context.read<SearchBloc>().add(SearchArtistsAndAlbums(''));
                     },
-                  );
-                }
-                
-                if (state.artists.isEmpty && state.albums.isEmpty) {
-                  return const Center(
-                    child: Text('Aucun résultat trouvé'),
-                  );
-                }
-                
-                return SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (state.artists.isNotEmpty) ...[
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text(
-                            'Artistes',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: state.artists.length,
-                          itemBuilder: (context, index) {
-                            final artist = state.artists[index];
-                            return ArtistTile(
-                              artist: artist,
-                              onTap: () {
-                                context.push('/artist/${artist.id}');
-                              },
-                            );
-                          },
-                        ),
-                      ],
-                      if (state.albums.isNotEmpty) ...[
-                        const Padding(
-                          padding: EdgeInsets.all(16.0),
-                          child: Text(
-                            'Albums',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                            ),
-                          ),
-                        ),
-                        ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: state.albums.length,
-                          itemBuilder: (context, index) {
-                            final album = state.albums[index];
-                            return AlbumTile(
-                              album: album,
-                              onTap: () {
-                                context.push('/album/${album.id}');
-                              },
-                            );
-                          },
-                        ),
-                      ],
-                    ],
                   ),
-                );
-              },
+                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Expanded(
+              child: BlocBuilder<SearchBloc, SearchState>(
+                builder: (context, state) {
+                  if (state.status == SearchStatus.loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state.status == SearchStatus.failure) {
+                    return const Center(child: Text('Erreur lors de la recherche'));
+                  } else if (state.artists.isEmpty && state.albums.isEmpty) {
+                    return const Center(child: Text('Aucun résultat'));
+                  }
+
+                  return ListView(
+                    children: [
+                      if (state.artists.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: Text(
+                                  'Artistes',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                              ...state.artists.map((artist) => Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF6F6F6),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: ListTile(
+                                  leading: ClipOval(
+                                    child: artist.strArtistThumb != null
+                                        ? CachedNetworkImage(
+                                      imageUrl: artist.strArtistThumb!,
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    )
+                                        : const Icon(Icons.person),
+                                  ),
+                                  title: Text(
+                                    artist.strArtist,
+                                    style: const TextStyle(fontWeight: FontWeight.w500),
+                                  ),
+                                  trailing: const Icon(Icons.chevron_right),
+                                  onTap: () {
+                                    context.go('/artist/${artist.id}');
+                                  },
+                                ),
+                              )),
+                            ],
+                          ),
+                        ),
+                      if (state.albums.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 8),
+                                child: Text(
+                                  'Albums',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                              ...state.albums.map((album) => Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFF6F6F6),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: ListTile(
+                                  leading: ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: album.strAlbumThumb != null
+                                        ? CachedNetworkImage(
+                                      imageUrl: album.strAlbumThumb!,
+                                      width: 50,
+                                      height: 50,
+                                      fit: BoxFit.cover,
+                                    )
+                                        : const Icon(Icons.album),
+                                  ),
+                                  title: Text(
+                                    album.strAlbum,
+                                    style: const TextStyle(fontWeight: FontWeight.w500),
+                                  ),
+                                  subtitle: Text(album.strArtist),
+                                  trailing: const Icon(Icons.chevron_right),
+                                  onTap: () {
+                                    context.go('/album/${album.id}');
+                                  },
+                                ),
+                              )),
+                            ],
+                          ),
+                        ),
+                    ],
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

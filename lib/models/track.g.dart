@@ -33,3 +33,15 @@ Map<String, dynamic> _$TrackToJson(Track instance) => <String, dynamic>{
       'strMusicVid': instance.musicVideoUrl,
       'strDescriptionEN': instance.descriptionEN,
     };
+
+TrackResponse _$TrackResponseFromJson(Map<String, dynamic> json) =>
+    TrackResponse(
+      track: (json['track'] as List<dynamic>?)
+          ?.map((e) => Track.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$TrackResponseToJson(TrackResponse instance) =>
+    <String, dynamic>{
+      'track': instance.track,
+    };

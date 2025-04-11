@@ -8,29 +8,29 @@ class ArtistState extends Equatable {
   final ArtistStatus status;
   final Artist? artist;
   final List<Album> albums;
-  final String? errorMessage;
-  
+
   const ArtistState({
     this.status = ArtistStatus.initial,
     this.artist,
     this.albums = const [],
-    this.errorMessage,
   });
-  
+
+  factory ArtistState.initial() {
+    return const ArtistState();
+  }
+
   ArtistState copyWith({
     ArtistStatus? status,
     Artist? artist,
     List<Album>? albums,
-    String? errorMessage,
   }) {
     return ArtistState(
       status: status ?? this.status,
       artist: artist ?? this.artist,
       albums: albums ?? this.albums,
-      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
-  
+
   @override
-  List<Object?> get props => [status, artist, albums, errorMessage];
+  List<Object?> get props => [status, artist, albums];
 }

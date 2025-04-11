@@ -70,3 +70,13 @@ class Track extends Equatable {
   @override
   List<Object?> get props => [id, title, artistId, albumId];
 }
+
+@JsonSerializable()
+class TrackResponse {
+  final List<Track>? track;
+
+  TrackResponse({this.track});
+
+  factory TrackResponse.fromJson(Map<String, dynamic> json) => _$TrackResponseFromJson(json);
+  Map<String, dynamic> toJson() => _$TrackResponseToJson(this);
+}

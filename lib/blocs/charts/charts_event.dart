@@ -1,12 +1,4 @@
-import 'package:equatable/equatable.dart';
+abstract class ChartsEvent {}
 
-abstract class ChartsEvent extends Equatable {
-  const ChartsEvent();
-  
-  @override
-  List<Object> get props => [];
-}
-
-class LoadCharts extends ChartsEvent {}
-
-class RefreshCharts extends ChartsEvent {}
+class LoadTopAlbums extends ChartsEvent {}
+class LoadTopTracks extends ChartsEvent {}

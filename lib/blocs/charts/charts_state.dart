@@ -1,36 +1,34 @@
-import 'package:equatable/equatable.dart';
-import '../../models/track.dart';
 import '../../models/album.dart';
+import '../../models/track.dart';
 
 enum ChartsStatus { initial, loading, success, failure }
 
-class ChartsState extends Equatable {
+class ChartsState {
   final ChartsStatus status;
-  final List<Track> singles;
-  final List<Album> albums;
-  final String? errorMessage;
-  
-  const ChartsState({
-    this.status = ChartsStatus.initial,
-    this.singles = const [],
-    this.albums = const [],
-    this.errorMessage,
+  final List<Album> topAlbums;
+  final List<Track> topTracks;
+
+  ChartsState({
+    required this.status,
+    required this.topAlbums,
+    required this.topTracks,
   });
-  
+
+  factory ChartsState.initial() => ChartsState(
+    status: ChartsStatus.initial,
+    topAlbums: [],
+    topTracks: [],
+  );
+
   ChartsState copyWith({
     ChartsStatus? status,
-    List<Track>? singles,
-    List<Album>? albums,
-    String? errorMessage,
+    List<Album>? topAlbums,
+    List<Track>? topTracks,
   }) {
     return ChartsState(
       status: status ?? this.status,
-      singles: singles ?? this.singles,
-      albums: albums ?? this.albums,
-      errorMessage: errorMessage ?? this.errorMessage,
+      topAlbums: topAlbums ?? this.topAlbums,
+      topTracks: topTracks ?? this.topTracks,
     );
   }
-  
-  @override
-  List<Object?> get props => [status, singles, albums, errorMessage];
 }

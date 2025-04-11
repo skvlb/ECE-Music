@@ -1,67 +1,99 @@
-// app.dart - Configuration de l'application
+import 'package:ece_music/screens/album_details.dart';
+import 'package:ece_music/screens/artist_details.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'routes.dart';
+import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+
+import 'blocs/album/album_event.dart';
+import 'blocs/artist/artist_event.dart';
 import 'repositories/music_repository.dart';
 import 'repositories/favorites_repository.dart';
+
+import 'screens/home_screen.dart';
+
+import 'blocs/artist/artist_bloc.dart';
+import 'blocs/album/album_bloc.dart';
 import 'blocs/charts/charts_bloc.dart';
 import 'blocs/search/search_bloc.dart';
 import 'blocs/favorites/favorites_bloc.dart';
 import 'blocs/charts/charts_event.dart';
 import 'blocs/favorites/favorites_event.dart';
 
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  await Hive.openBox<String>('favorites');
+
+  runApp(MyApp());
+}
+
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  final MusicRepository repository = MusicRepository();
+
+  MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // Initialiser les repositories
-    final musicRepository = MusicRepository();
-    final favoritesRepository = FavoritesRepository();
-    
     return MultiRepositoryProvider(
       providers: [
-        RepositoryProvider<MusicRepository>(
-          create: (context) => musicRepository,
-        ),
+        RepositoryProvider<MusicRepository>.value(value: repository),
         RepositoryProvider<FavoritesRepository>(
-          create: (context) => favoritesRepository,
+          create: (_) => FavoritesRepository(),
         ),
       ],
       child: MultiBlocProvider(
         providers: [
-          BlocProvider<ChartsBloc>(
-            create: (context) => ChartsBloc(musicRepository)..add(LoadCharts()),
-          ),
-          BlocProvider<SearchBloc>(
-            create: (context) => SearchBloc(musicRepository),
-          ),
-          BlocProvider<FavoritesBloc>(
-            create: (context) => FavoritesBloc(favoritesRepository)..add(LoadFavorites()),
+          BlocProvider(create: (_) => ArtistBloc(repository)),
+          BlocProvider(create: (_) => AlbumBloc(repository)),
+          BlocProvider(create: (_) => SearchBloc(repository)),
+          BlocProvider(create: (_) => ChartsBloc(repository)..add(LoadTopAlbums())),
+          BlocProvider(
+            create: (context) => FavoritesBloc(context.read<FavoritesRepository>())..add(LoadFavorites()),
           ),
         ],
         child: MaterialApp.router(
-          title: 'Music App',
           debugShowCheckedModeBanner: false,
+          routerConfig: _router(repository),
           theme: ThemeData(
+            fontFamily: 'SFPro',
             useMaterial3: true,
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: Colors.black,
-              brightness: Brightness.dark,
-            ),
-            scaffoldBackgroundColor: Colors.black,
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              elevation: 0,
-            ),
-textTheme: ThemeData.dark().textTheme.copyWith(
-
-),
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
           ),
-          routerConfig: appRouter,
         ),
       ),
     );
   }
+}
+
+GoRouter _router(MusicRepository repository) {
+  return GoRouter(
+    initialLocation: '/',
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (context, state) => const HomeScreen(),
+      ),
+      GoRoute(
+        path: '/artist/:id',
+        builder: (context, state) {
+          final artistId = state.pathParameters['id']!;
+          return BlocProvider(
+            create: (_) => ArtistBloc(repository)..add(LoadArtistDetails(artistId)),
+            child: ArtistDetailsScreen(artistId: artistId),
+          );
+        },
+      ),
+      GoRoute(
+        path: '/album/:albumId',
+        builder: (context, state) {
+          final albumId = state.pathParameters['albumId']!;
+          return BlocProvider(
+            create: (_) => AlbumBloc(repository)..add(LoadAlbumDetails(albumId)),
+            child: AlbumDetailsScreen(albumId: albumId),
+          );
+        },
+      ),
+    ],
+  );
 }

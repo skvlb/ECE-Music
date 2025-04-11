@@ -1,36 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:go_router/go_router.dart';
+
 import '../models/artist.dart';
 
 class ArtistTile extends StatelessWidget {
   final Artist artist;
-  final VoidCallback onTap;
-  
-  const ArtistTile({
-    super.key,
-    required this.artist,
-    required this.onTap,
-  });
+
+  const ArtistTile({super.key, required this.artist});
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: artist.thumbUrl != null
+      leading: artist.strArtistThumb != null
           ? CircleAvatar(
-              backgroundImage: CachedNetworkImageProvider(artist.thumbUrl!),
-              radius: 25,
-            )
-          : CircleAvatar(
-              backgroundColor: Colors.grey[850],
-              child: const Icon(Icons.person),
-              radius: 25,
-            ),
-      title: Text(artist.name),
-      subtitle: artist.genre != null
-          ? Text(artist.genre!)
-          : null,
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
+        backgroundImage: CachedNetworkImageProvider(artist.strArtistThumb!),
+        radius: 25,
+      )
+          : const CircleAvatar(
+        child: Icon(Icons.person),
+        radius: 25,
+      ),
+      title: Text(artist.strArtist),
+      subtitle: artist.strGenre != null ? Text(artist.strGenre!) : null,
+      onTap: () {
+        if (artist.id != null) {
+          GoRouter.of(context).go('/artist/${artist.id}');
+        } else {
+          debugPrint('Artist ID is null');
+        }
+      },
     );
   }
 }

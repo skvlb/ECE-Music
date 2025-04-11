@@ -8,32 +8,38 @@ part of 'album.dart';
 
 Album _$AlbumFromJson(Map<String, dynamic> json) => Album(
       id: json['idAlbum'] as String,
-      artistId: json['idArtist'] as String,
-      title: json['strAlbum'] as String,
-      artistName: json['strArtist'] as String,
-      yearReleased: json['intYearReleased'] as String?,
-      genre: json['strGenre'] as String?,
-      style: json['strStyle'] as String?,
-      thumbUrl: json['strAlbumThumb'] as String?,
-      cdArtUrl: json['strAlbumCDart'] as String?,
-      descriptionEN: json['strDescriptionEN'] as String?,
-      descriptionFR: json['strDescriptionFR'] as String?,
-      score: json['intScore'] as String?,
-      scoreVotes: json['intScoreVotes'] as String?,
+      strAlbum: json['strAlbum'] as String,
+      strArtist: json['strArtist'] as String,
+      strAlbumThumb: json['strAlbumThumb'] as String?,
+      strDescriptionEN: json['strDescriptionEN'] as String?,
+      strDescriptionFR: json['strDescriptionFR'] as String?,
+      strGenre: json['strGenre'] as String?,
+      intYearReleased: json['intYearReleased'] as String?,
+      intScore: json['intScore'] as String?,
+      intScoreVotes: json['intScoreVotes'] as String?,
     );
 
 Map<String, dynamic> _$AlbumToJson(Album instance) => <String, dynamic>{
       'idAlbum': instance.id,
-      'idArtist': instance.artistId,
-      'strAlbum': instance.title,
-      'strArtist': instance.artistName,
-      'intYearReleased': instance.yearReleased,
-      'strGenre': instance.genre,
-      'strStyle': instance.style,
-      'strAlbumThumb': instance.thumbUrl,
-      'strAlbumCDart': instance.cdArtUrl,
-      'strDescriptionEN': instance.descriptionEN,
-      'strDescriptionFR': instance.descriptionFR,
-      'intScore': instance.score,
-      'intScoreVotes': instance.scoreVotes,
+      'strAlbum': instance.strAlbum,
+      'strAlbumThumb': instance.strAlbumThumb,
+      'strArtist': instance.strArtist,
+      'strDescriptionEN': instance.strDescriptionEN,
+      'strDescriptionFR': instance.strDescriptionFR,
+      'strGenre': instance.strGenre,
+      'intYearReleased': instance.intYearReleased,
+      'intScore': instance.intScore,
+      'intScoreVotes': instance.intScoreVotes,
+    };
+
+AlbumResponse _$AlbumResponseFromJson(Map<String, dynamic> json) =>
+    AlbumResponse(
+      album: (json['album'] as List<dynamic>?)
+          ?.map((e) => Album.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+
+Map<String, dynamic> _$AlbumResponseToJson(AlbumResponse instance) =>
+    <String, dynamic>{
+      'album': instance.album,
     };

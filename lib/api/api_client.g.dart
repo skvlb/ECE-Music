@@ -13,7 +13,7 @@ class _ApiClient implements ApiClient {
     this._dio, {
     this.baseUrl,
   }) {
-    baseUrl ??= 'https://theaudiodb.com/api/v1/json/523532';
+    baseUrl ??= 'https://theaudiodb.com/api/v1/json/523532/';
   }
 
   final Dio _dio;
@@ -34,7 +34,7 @@ class _ApiClient implements ApiClient {
     )
             .compose(
               _dio.options,
-              '/search.php',
+              'search.php',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -48,34 +48,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<AlbumResponse> searchAlbum(String albumName) async {
-    const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r's': albumName};
-    final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<AlbumResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/searchalbum.php',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
-    final value = AlbumResponse.fromJson(_result.data!);
-    return value;
-  }
-
-  @override
-  Future<ArtistResponse> getArtistById(String artistId) async {
+  Future<ArtistResponse> getArtistDetails(String artistId) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'i': artistId};
     final _headers = <String, dynamic>{};
@@ -88,7 +61,7 @@ class _ApiClient implements ApiClient {
     )
             .compose(
               _dio.options,
-              '/artist.php',
+              'artist.php',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -102,7 +75,88 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<AlbumResponse> getArtistAlbums(String artistId) async {
+  Future<AlbumResponse> searchAlbum(String artistName) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r's': artistName};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AlbumResponse>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'searchalbum.php',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = AlbumResponse.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<AlbumResponse> getAlbumDetails(String albumId) async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{r'm': albumId};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AlbumResponse>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'album.php',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = AlbumResponse.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<AlbumResponse> getTopAlbums() async {
+    const _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final Map<String, dynamic>? _data = null;
+    final _result = await _dio
+        .fetch<Map<String, dynamic>>(_setStreamType<AlbumResponse>(Options(
+      method: 'GET',
+      headers: _headers,
+      extra: _extra,
+    )
+            .compose(
+              _dio.options,
+              'mostloved.php?format=album',
+              queryParameters: queryParameters,
+              data: _data,
+            )
+            .copyWith(
+                baseUrl: _combineBaseUrls(
+              _dio.options.baseUrl,
+              baseUrl,
+            ))));
+    final value = AlbumResponse.fromJson(_result.data!);
+    return value;
+  }
+
+  @override
+  Future<AlbumResponse> getAlbumsByArtistId(String artistId) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'i': artistId};
     final _headers = <String, dynamic>{};
@@ -115,7 +169,7 @@ class _ApiClient implements ApiClient {
     )
             .compose(
               _dio.options,
-              '/album.php',
+              'album.php',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -129,7 +183,7 @@ class _ApiClient implements ApiClient {
   }
 
   @override
-  Future<TrackResponse> getAlbumTracks(String albumId) async {
+  Future<TrackResponse> getTracksByAlbumId(String albumId) async {
     const _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{r'm': albumId};
     final _headers = <String, dynamic>{};
@@ -142,7 +196,7 @@ class _ApiClient implements ApiClient {
     )
             .compose(
               _dio.options,
-              '/track.php',
+              'track.php',
               queryParameters: queryParameters,
               data: _data,
             )
@@ -152,99 +206,6 @@ class _ApiClient implements ApiClient {
               baseUrl,
             ))));
     final value = TrackResponse.fromJson(_result.data!);
-    return value;
-  }
-
-  @override
-  Future<AlbumResponse> getAlbumById(String albumId) async {
-    const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{r'm': albumId};
-    final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<AlbumResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/album.php',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
-    final value = AlbumResponse.fromJson(_result.data!);
-    return value;
-  }
-
-  @override
-  Future<TrackResponse> getTrendingSingles(
-    String country,
-    String type,
-  ) async {
-    const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{
-      r'country': country,
-      r'type': type,
-    };
-    final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<TrackResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/trending.php',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
-    final value = TrackResponse.fromJson(_result.data!);
-    return value;
-  }
-
-  @override
-  Future<AlbumResponse> getTrendingAlbums(
-    String country,
-    String type,
-  ) async {
-    const _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{
-      r'country': country,
-      r'type': type,
-    };
-    final _headers = <String, dynamic>{};
-    final Map<String, dynamic>? _data = null;
-    final _result = await _dio
-        .fetch<Map<String, dynamic>>(_setStreamType<AlbumResponse>(Options(
-      method: 'GET',
-      headers: _headers,
-      extra: _extra,
-    )
-            .compose(
-              _dio.options,
-              '/trending.php',
-              queryParameters: queryParameters,
-              data: _data,
-            )
-            .copyWith(
-                baseUrl: _combineBaseUrls(
-              _dio.options.baseUrl,
-              baseUrl,
-            ))));
-    final value = AlbumResponse.fromJson(_result.data!);
     return value;
   }
 
